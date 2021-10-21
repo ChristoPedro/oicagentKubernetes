@@ -47,7 +47,7 @@ spec:
     spec:
       containers:
       - name: oicagent
-        image: {docker_image}
+        image: gru.ocir.io/id3kyspkytmr/pedrochristo/agentconnectivity:5
         envFrom:
         - configMapRef:
             name: agent-config
