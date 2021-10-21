@@ -1,0 +1,56 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: oic
+  labels:
+    name: oic  
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-config
+  namespace: oic
+data:
+  oic_URL: {oic_url}
+  agent_GROUP_IDENTIFIER: {agent_group}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-agent
+  namespace: oic
+type: Opaque
+stringData:
+  oic_USER: {oic_user}
+  oic_PASSWORD: {oic_password}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: oic
+  name: oicagent
+  labels:
+    app: oicagent
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: oicagent
+  template:
+    metadata:
+      labels:
+        app: oicagent
+    spec:
+      containers:
+      - name: oicagent
+        image: {docker_image}
+        envFrom:
+        - configMapRef:
+            name: agent-config
+        - secretRef:
+            name: secret-agent
+        imagePullPolicy: Always
