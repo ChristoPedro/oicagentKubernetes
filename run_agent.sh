@@ -78,7 +78,7 @@ if [ ! -d agenthome ] ; then
 
             AGENT=true
         fi
-        sleep 10
+        sleep 20
 
     done
 
