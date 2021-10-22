@@ -29,3 +29,9 @@ To run more than one Agent Group, you can create a new ConfigMap and a new deplo
 2. Replace {oic_url} and {agent_group} on the ConfigMap to your OIC URL and your Agent Group Identifier
 3. Replace {oic_user} and {oic_password} on the Secret to your OIC credentials
 4. [Optional] - Rebuild the docker image and push it to your private repository. After this, you can change the image on the Deploy.
+
+### If you need to use a proxy
+
+You can use the Kubernetes [manifest with proxy](/oic-agent-deploy-with-proxy.yaml). This manifest has a ConfigMap and a Secret to allow you to pass your proxy configuration. you just need to replace the variables on this objects.
+
+On the same manifest there is already a new Deployment injecting the proxy variables into the pod.

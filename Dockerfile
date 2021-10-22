@@ -1,6 +1,6 @@
-FROM openjdk:11
+FROM store/oracle/jdk:11
 
-RUN apt-get -y update && apt-get -y install jq
+RUN yum -y install jq
 
 RUN mkdir -p /u01/agent/install
 

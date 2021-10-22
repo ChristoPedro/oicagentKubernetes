@@ -28,6 +28,28 @@ stringData:
   oic_PASSWORD: {oic_password}
 
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxy-config
+  namespace: oic
+data:
+  proxy_HOST: {proxy_HOST}
+  proxy_PORT: {proxy_PORT}
+  proxy_NON_PROXY_HOSTS: {proxy_NON_PROXY_HOSTS}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-proxy
+  namespace: oic
+type: Opaque
+stringData:
+  oic_USER: {proxy_USER}
+  oic_PASSWORD: {proxy_PASSWORD}
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -51,6 +73,10 @@ spec:
         envFrom:
         - configMapRef:
             name: agent-config
+        - configMaRef:
+            name: proxy-config
         - secretRef:
             name: secret-agent
+        - secretRef:
+            name: secret-proxy
         imagePullPolicy: Always
