@@ -41,7 +41,7 @@ if [ ! -d agenthome ] ; then
     while [ "${AGENT}" != "true" ]; do 
 
         COUNT=0
-        AGENT_REMOVE=""
+        AGENT_REMOVE=()
 
         # Get the OCI Agent List by Agent Group
 
@@ -61,7 +61,7 @@ if [ ! -d agenthome ] ; then
             fi
             if [ "${status}" != "Active" ];
             then
-                AGENT_REMOVE=$(jq '.id' <<< "$item" "-r")
+                AGENT_REMOVE+=($(jq '.id' <<< "$item" "-r"))
 
             fi
         done
@@ -69,9 +69,11 @@ if [ ! -d agenthome ] ; then
         if ((${COUNT} < 2));
         then
 
-            if [ -n "${AGENT_REMOVE}" ];
+            if (( "${#AGENT_REMOVE[@]}" > 0 ));
             then
-                $(curl --request DELETE -u ${USERPW} ${oic_URL}${AGENT_STATUS}/${AGENT_REMOVE})
+                for i in "${AGENT_REMOVE[@]}";do
+                    $(curl --request DELETE -u ${USERPW} ${oic_URL}${AGENT_STATUS}/$i)
+                done
             fi
 
             AGENT=true
