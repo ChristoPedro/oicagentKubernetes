@@ -10,6 +10,7 @@ AGENT_JAR=connectivityagent.jar
 AGENT_ZIP=oic_conn_agent_installer.zip
 AGENT_DOWNLOAD=/ic/api/integration/v1/agents/binaries/connectivity
 AGENT_STATUS=/ic/api/integration/v1/agentgroups/${agent_GROUP_IDENTIFIER}/agents
+AGENT=false 
 
 # Check if already initialized
 if [ ! -d agenthome ] ; then
@@ -33,25 +34,50 @@ if [ ! -d agenthome ] ; then
         USERPW=${UN}:${oic_PASSWORD}
     fi
 
-
     echo Verify agent group
 
-    # Get the OCI Agent List by Agent Group
+    echo ${AGENT}
 
-    agentStatus=$(curl -f -u ${USERPW} ${oic_URL}${AGENT_STATUS})
+    while [ "${AGENT}" != "true" ]; do 
+
+        COUNT=0
+        AGENT_REMOVE=""
+
+        # Get the OCI Agent List by Agent Group
+
+        agentStatus=$(curl -f -u ${USERPW} ${oic_URL}${AGENT_STATUS})
     
-    #Verify if there are any no Active agente and remove it from the agent group 
+        #Verify if there are any no Active agente and remove it from the agent group 
 
-    readarray -t my_array < <(jq -c '.items[]' <<< ${agentStatus}) 
+        readarray -t my_array < <(jq -c '.items[]' <<< ${agentStatus}) 
 
-    for item in "${my_array[@]}"; do
-    status=$(jq '.status' <<< "$item" "-r")
-    
-    if [ "${status}" != "Active" ] 
-    then
-        echo $(jq '.id' <<< "$item" "-r") Removido
-        $(curl --request DELETE -u ${USERPW} ${oic_URL}${AGENT_STATUS}/$(jq '.id' <<< "$item" "-r"))
-    fi
+        for item in "${my_array[@]}"; do
+            status=$(jq '.status' <<< "$item" "-r")
+
+            if [ "${status}" == "Active" ];
+            then
+
+                ((COUNT+=1))
+            fi
+            if [ "${status}" != "Active" ];
+            then
+                AGENT_REMOVE=$(jq '.id' <<< "$item" "-r")
+
+            fi
+        done
+        
+        if ((${COUNT} < 2));
+        then
+
+            if [ -n "${AGENT_REMOVE}" ];
+            then
+                $(curl --request DELETE -u ${USERPW} ${oic_URL}${AGENT_STATUS}/${AGENT_REMOVE})
+            fi
+
+            AGENT=true
+        fi
+        sleep 10
+
     done
 
     # Set curl proxy
